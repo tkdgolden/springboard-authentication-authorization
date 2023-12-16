@@ -17,7 +17,12 @@ db.create_all()
 
 @app.route("/")
 def index():
-    return redirect("/register")
+    if 'user' in session:
+        user = User.query.get_or_404(session['user'])
+        
+        return redirect(f"/users/{user.username}")
+    else:
+        return redirect("/register")
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
@@ -37,7 +42,7 @@ def register():
 
         session['user'] = user.username
 
-        return redirect("/secret")
+        return redirect(f"/users/{user.username}")
     
     else:
         return render_template("register_user_form.html", form=form)
@@ -54,18 +59,20 @@ def login():
 
         if user:
             session['user'] = user.username
-            return redirect("/secret")
+            return redirect(f"/users/{user.username}")
         else:
             return redirect("/login")
     
     else:
         return render_template("login_user_form.html", form=form)
     
-@app.route("/secret")
-def secret():
+@app.route("/users/<username>")
+def secret(username):
 
     if 'user' in session:
-        return render_template("secret.html")
+        user = User.query.get_or_404(username)
+
+        return render_template("user_info.html", user=user)
     
     else:
         return redirect("/")

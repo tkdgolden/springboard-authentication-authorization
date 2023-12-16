@@ -6,6 +6,14 @@
     <title>{% block title %}{% endblock %}</title>
 </head>
 <body>
+    <div>
+        {% if 'user' in session %}
+        <a href="/logout"><button type="button">Log Out</button></a>
+        {% else %}
+        <a href="/register"><button type="button">Register</button></a>
+        <a href="/login"><button type="button">Log In</button></a>
+        {% endif %}
+    </div>
     {% block body %} {% endblock %}
 </body>
 </html>

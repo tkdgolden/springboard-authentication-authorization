@@ -1,4 +1,4 @@
-from models import User, db
+from models import User, db, Feedback
 from flask_bcrypt import Bcrypt
 
 db.drop_all()
@@ -15,5 +15,15 @@ ed = User.register(username="ed", password="edpass", email="ed@gmail.com", first
 db.session.add(al)
 db.session.add(bo)
 db.session.add(ed)
+
+db.session.commit()
+
+good = Feedback(title="Good", content="This is good.", username="bo")
+bad = Feedback(title="Bad", content="This is bad.", username="al")
+meh = Feedback(title="meh", content="This is meh...", username="al")
+
+db.session.add(good)
+db.session.add(bad)
+db.session.add(meh)
 
 db.session.commit()

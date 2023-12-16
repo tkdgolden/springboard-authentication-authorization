@@ -1,6 +1,6 @@
 from flask import Flask, redirect, render_template, session
-from models import db, connect_db, User
-from forms import RegisterUserForm, LoginUserForm
+from models import db, connect_db, User, Feedback
+from forms import RegisterUserForm, LoginUserForm, AddFeedbackForm
 from secret import MY_SECRET
 
 app = Flask(__name__)
@@ -27,7 +27,7 @@ def check_user():
 def index():
     user = check_user()
     if user:
-        return redirect(f"/users/{user.username}")
+        return redirect("/users")
     else:
         return redirect("/register")
 
@@ -49,7 +49,7 @@ def register():
 
         session['user'] = user.username
 
-        return redirect(f"/users/{user.username}")
+        return redirect("/users")
     
     else:
         return render_template("register_user_form.html", form=form)
@@ -66,17 +66,17 @@ def login():
 
         if user:
             session['user'] = user.username
-            return redirect(f"/users/{user.username}")
+            return redirect("/users")
         else:
             return redirect("/login")
     
     else:
         return render_template("login_user_form.html", form=form)
     
-@app.route("/users/<username>")
-def secret(username):
+@app.route("/users")
+def secret():
     user = check_user()
-    if user.username == username:
+    if user:
         return render_template("user_info.html", user=user)
     
     else:
@@ -85,5 +85,35 @@ def secret(username):
 @app.route("/logout")
 def logout():
     session.pop('user')
+
+    return redirect("/")
+
+@app.route("/users/delete")
+def delete_user():
+    user = check_user()
+    if user:
+        db.session.delete(user)
+        db.session.commit()
+        session.pop('user')
+    
+    return redirect("/")
+
+@app.route("/feedback/add", methods=["GET", "POST"])
+def add_feedback():
+    user = check_user()
+    if user:
+        form = AddFeedbackForm()
+        if form.validate_on_submit():
+            title = form.title.data
+            content = form.content.data
+
+            feedback = Feedback(title=title, content=content, username=user.username)
+            db.session.add(feedback)
+            db.session.commit()
+
+            return redirect("/users")
+        
+        else:
+            return render_template("add_feedback_form.html", form=form)
 
     return redirect("/")

@@ -7,6 +7,8 @@
 <h1>{{ user.first_name }} {{ user.last_name }}</h1>
 <p>Username: {{ user.username }}</p>
 <p>Email: {{ user.email }}</p>
+<a href="/users/delete"><button type="button">Delete Account</button></a>
+<a href="/feedback/add"><button type="button">Add Feedback</button></a>
 {% for each in user.feedback %}
     <h6>{{ each.title }}</h6>
     <p>{{ each.content }}</p>

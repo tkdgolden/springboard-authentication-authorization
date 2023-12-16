@@ -63,4 +63,15 @@ def login():
     
 @app.route("/secret")
 def secret():
-    return render_template("secret.html")
+
+    if 'user' in session:
+        return render_template("secret.html")
+    
+    else:
+        return redirect("/")
+    
+@app.route("/logout")
+def logout():
+    session.pop('user')
+
+    return redirect("/")

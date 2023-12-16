@@ -15,11 +15,18 @@ connect_db(app)
 app.app_context().push()
 db.create_all()
 
-@app.route("/")
-def index():
+def check_user():
     if 'user' in session:
         user = User.query.get_or_404(session['user'])
-        
+
+        return user
+    else:
+        return False
+
+@app.route("/")
+def index():
+    user = check_user()
+    if user:
         return redirect(f"/users/{user.username}")
     else:
         return redirect("/register")
@@ -68,10 +75,8 @@ def login():
     
 @app.route("/users/<username>")
 def secret(username):
-
-    if 'user' in session:
-        user = User.query.get_or_404(username)
-
+    user = check_user()
+    if user.username == username:
         return render_template("user_info.html", user=user)
     
     else:

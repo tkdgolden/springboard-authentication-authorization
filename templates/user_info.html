@@ -7,5 +7,9 @@
 <h1>{{ user.first_name }} {{ user.last_name }}</h1>
 <p>Username: {{ user.username }}</p>
 <p>Email: {{ user.email }}</p>
+{% for each in user.feedback %}
+    <h6>{{ each.title }}</h6>
+    <p>{{ each.content }}</p>
+{% endfor %}
 
 {% endblock %}

@@ -13,6 +13,7 @@
     <h6>{{ each.title }}</h6>
     <p>{{ each.content }}</p>
     <a><button type="button" class="update" data-fbid="{{ each.id }}">Update</button></a>
+    <a><button type="button" class="delete" data-fbid="{{ each.id }}">Delete</button></a>
 {% endfor %}
 
 {% endblock %}

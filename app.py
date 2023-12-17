@@ -16,23 +16,29 @@ app.app_context().push()
 db.create_all()
 
 def check_user():
+    """ Check session for user info. """
+
     if 'user' in session:
         user = User.query.get_or_404(session['user'])
-
         return user
     else:
         return False
 
 @app.route("/")
 def index():
+    """ Display login page if not logged in, user info page if logged in. """
+
     user = check_user()
+
     if user:
         return redirect("/users")
     else:
-        return redirect("/register")
+        return redirect("/login")
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
+    """ Register a new user with a form, form submission. """
+
     form = RegisterUserForm()
 
     if form.validate_on_submit():
@@ -51,11 +57,12 @@ def register():
 
         return redirect("/users")
     
-    else:
-        return render_template("register_user_form.html", form=form)
+    return render_template("register_user_form.html", form=form)
     
 @app.route("/login", methods=["GET", "POST"])
 def login():
+    """ Log in a user with a form, form submission. """
+
     form = LoginUserForm()
 
     if form.validate_on_submit():
@@ -66,32 +73,42 @@ def login():
 
         if user:
             session['user'] = user.username
+
             return redirect("/users")
+        
         else:
+
             return redirect("/login")
     
-    else:
-        return render_template("login_user_form.html", form=form)
+    return render_template("login_user_form.html", form=form)
     
 @app.route("/users")
-def secret():
+def user_info():
+    """ Show current user info and all of their feedback. """
+
     user = check_user()
+
     if user:
+
         return render_template("user_info.html", user=user)
     
-    else:
-        return redirect("/")
+    return redirect("/")
     
 @app.route("/logout")
 def logout():
+    """ Remove user from session. """
+
     session.pop('user')
 
     return redirect("/")
 
 @app.route("/users/delete")
 def delete_user():
+    """ Delete the selected user. """
+
     user = check_user()
-    if user:
+
+    if user != False:
         db.session.delete(user)
         db.session.commit()
         session.pop('user')
@@ -100,31 +117,41 @@ def delete_user():
 
 @app.route("/feedback/add", methods=["GET", "POST"])
 def add_feedback():
+    """ Add new user feedback with form, form submission. """
+
     user = check_user()
-    if user:
-        form = FeedbackForm()
-        if form.validate_on_submit():
-            title = form.title.data
-            content = form.content.data
 
-            feedback = Feedback(title=title, content=content, username=user.username)
-            db.session.add(feedback)
-            db.session.commit()
+    if user == False:
 
-            return redirect("/users")
-        
-        else:
-            return render_template("feedback_form.html", form=form)
+        return redirect("/")
+    
+    form = FeedbackForm()
 
-    return redirect("/")
+    if form.validate_on_submit():
+        title = form.title.data
+        content = form.content.data
+
+        feedback = Feedback(title=title, content=content, username=user.username)
+        db.session.add(feedback)
+        db.session.commit()
+
+        return redirect("/users")
+    
+    return render_template("feedback_form.html", form=form)
 
 @app.route("/feedback/<int:feedback_id>/update", methods=["GET", "POST"])
 def update_feedback(feedback_id):
+    """ Update the selected feedback with form, form submission. """
+
     user = check_user()
     feedback = Feedback.query.get_or_404(feedback_id)
-    if feedback.user.username != user.username:
+
+    if (user == False) or (feedback.user.username != user.username):
+
         return redirect("/")
+    
     form = FeedbackForm(obj=feedback)
+
     if form.validate_on_submit():
         feedback.title = form.title.data
         feedback.content = form.content.data
@@ -135,3 +162,24 @@ def update_feedback(feedback_id):
     
     else:
         return render_template("feedback_form.html", form=form)
+    
+@app.route("/feedback/<int:feedback_id>/delete")
+def delete_feedback(feedback_id):
+    """ Delete the selected feedback. """
+
+    user = check_user()
+
+    if user == False:
+
+        return redirect("/")
+    
+    feedback = Feedback.query.get_or_404(feedback_id)
+
+    if feedback.user.username != user.username:
+
+        return redirect("/")
+    
+    db.session.delete(feedback)
+    db.session.commit()
+
+    return redirect("/")

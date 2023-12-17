@@ -12,6 +12,7 @@
 {% for each in user.feedback %}
     <h6>{{ each.title }}</h6>
     <p>{{ each.content }}</p>
+    <a><button type="button" class="update" data-fbid="{{ each.id }}">Update</button></a>
 {% endfor %}
 
 {% endblock %}

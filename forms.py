@@ -13,6 +13,6 @@ class LoginUserForm(FlaskForm):
     username = StringField("Username:", validators=[InputRequired(), Length(1, 20)])
     password = PasswordField("Password:", validators=[InputRequired()])
 
-class AddFeedbackForm(FlaskForm):
+class FeedbackForm(FlaskForm):
     title = StringField("Title:", validators=[InputRequired(), Length(1, 100)])
     content = TextAreaField("Content:", validators=[InputRequired()])

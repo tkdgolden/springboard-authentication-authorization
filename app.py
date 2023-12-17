@@ -1,6 +1,6 @@
 from flask import Flask, redirect, render_template, session
 from models import db, connect_db, User, Feedback
-from forms import RegisterUserForm, LoginUserForm, AddFeedbackForm
+from forms import RegisterUserForm, LoginUserForm, FeedbackForm
 from secret import MY_SECRET
 
 app = Flask(__name__)
@@ -102,7 +102,7 @@ def delete_user():
 def add_feedback():
     user = check_user()
     if user:
-        form = AddFeedbackForm()
+        form = FeedbackForm()
         if form.validate_on_submit():
             title = form.title.data
             content = form.content.data
@@ -114,6 +114,24 @@ def add_feedback():
             return redirect("/users")
         
         else:
-            return render_template("add_feedback_form.html", form=form)
+            return render_template("feedback_form.html", form=form)
 
     return redirect("/")
+
+@app.route("/feedback/<int:feedback_id>/update", methods=["GET", "POST"])
+def update_feedback(feedback_id):
+    user = check_user()
+    feedback = Feedback.query.get_or_404(feedback_id)
+    if feedback.user.username != user.username:
+        return redirect("/")
+    form = FeedbackForm(obj=feedback)
+    if form.validate_on_submit():
+        feedback.title = form.title.data
+        feedback.content = form.content.data
+
+        db.session.commit()
+
+        return redirect("/users")
+    
+    else:
+        return render_template("feedback_form.html", form=form)
